@@ -87,10 +87,10 @@ Fineta 提供了從台灣證券交易所（TWSE）自動抓取公司財務資料
    git clone https://github.com/audi0417/Fineta.git
     ```
 2. 進入專案目錄並安裝所需的套件：
-  ```bash
-  cd Fineta
-  pip install -r requirements.txt
-  ```
+   ```bash
+   cd Fineta
+   pip install -r requirements.txt
+   ```
 
 ## 使用方法
 Fineta 可以用於抓取財務報表數據並進行分析，具體步驟如下：
@@ -132,7 +132,7 @@ balance_sheet = scraper.get_financial_statements(statement_type="balance_sheet")
 export_to_csv(balance_sheet, "tsmc_balance_sheet.csv")
 ```
 
-##例外處理
+## 例外處理
 在使用 Fineta 進行財務數據抓取的過程中，若遇到無法抓取或網站請求失敗等情況，會自動觸發自定義例外。這些例外都在 Fineta.crawler.exceptions 模組中定義，您可以自行捕捉並處理。
 ```python
 from Fineta.crawler import FinancialScraper
