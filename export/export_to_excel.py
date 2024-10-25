@@ -29,17 +29,10 @@ class ExportToExcel:
 
     def export(self, file_path: str):
         with pd.ExcelWriter(file_path) as writer:
-            # 基本价格数据
             self.df.to_excel(writer, sheet_name='Price Data')
-
-            # 技术指标
             technical_df = self.calculate_technical_indicators()
             technical_df.to_excel(writer, sheet_name='Technical Indicators')
-
-            # 基本面分析
             fundamental_df = calculate_fundamentals(self.df)
             fundamental_df.to_excel(writer, sheet_name='Fundamental Analysis')
-
-            # 波动性与风险
             risk_df = calculate_volatility_and_risk(self.df)
             risk_df.to_excel(writer, sheet_name='Volatility & Risk')
