@@ -28,19 +28,16 @@ class StockPriceFetcher:
         
         df = pd.concat(self.stock_data.values(), keys=self.stock_data.keys(), names=['Stock', 'Date'])
 
-        # 移除时区并将日期转换为纯日期（没有时间部分）
         if isinstance(df.index, pd.MultiIndex):
-            # 处理 MultiIndex 的 Date 部分
             new_levels = []
             for level in df.index.levels:
                 if level.dtype.kind == 'M':
-                    level = level.tz_localize(None).normalize()  # 移除时区并保留日期
-                    level = level.date  # 转换为日期
+                    level = level.tz_localize(None).normalize() 
+                    level = level.date  
                 new_levels.append(level)
             df.index = df.index.set_levels(new_levels)
         else:
-            # 如果不是 MultiIndex，直接处理单个 DatetimeIndex
             df.index = df.index.tz_localize(None).normalize()
-            df.index = df.index.date  # 转换为日期
+            df.index = df.index.date  
                 
         return df
