@@ -62,7 +62,8 @@ Fineta 提供了從台灣證券交易所（TWSE）自動抓取公司財務資料
 │
 ├── LICENSE                           # 授權文件
 ├── README.md                         # 專案總說明文件
-└── stock.py                          # 股票核心邏輯
+├── stock.py                          # 股票核心邏輯
+└── requirements.txt                  # 所需套件
 ```
 
 ### 主要模組：
