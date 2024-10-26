@@ -1,8 +1,8 @@
-# FINPLUS/pricing/stock_price_fetcher.py
+# Fineta/pricing/stock_price_fetcher.py
 
 import yfinance as yf
 import pandas as pd
-from FINPLUS.stock import Stock, Portfolio
+from Fineta.stock import Stock, Portfolio
 from typing import Union, List
 
 class StockPriceFetcher:
@@ -29,15 +29,16 @@ class StockPriceFetcher:
         df = pd.concat(self.stock_data.values(), keys=self.stock_data.keys(), names=['Stock', 'Date'])
 
         if isinstance(df.index, pd.MultiIndex):
+
             new_levels = []
             for level in df.index.levels:
                 if level.dtype.kind == 'M':
-                    level = level.tz_localize(None).normalize() 
+                    level = level.tz_localize(None).normalize()  
                     level = level.date  
                 new_levels.append(level)
             df.index = df.index.set_levels(new_levels)
         else:
             df.index = df.index.tz_localize(None).normalize()
-            df.index = df.index.date  
+            df.index = df.index.date 
                 
         return df
