@@ -1,5 +1,5 @@
 from .financial_report import FinancialScraper
-from .stockPrice_yfinance import StockPriceFetcher
+from .stock_price_fetcher import StockPriceFetcher
 from .exceptions import FinancialScraperError
 
 __all__ = ['FinancialScraper', 'FinancialScraperError','StockPriceFetcher']
