@@ -101,9 +101,10 @@ Fineta 可以用於抓取財務報表數據並進行分析，具體步驟如下�
 from Fineta.crawler import FinancialScraper
 ```
 
-2. 初始化 FinancialScraper 類別： 創建 FinancialScraper 的實例，並指定股票代號 (stock_id) 以及開始和結束日期 (start_date 和 end_date)。
+2. 初始化 FinancialScraper 類別： 創建 FinancialScraper 的實例，可建立投資組合 (portfolio)，並指定當中的股票代號以及開始和結束日期 (start_date 和 end_date)。
 ```python
-scraper = FinancialScraper(stock_id="2330", start_date="2022-01-01", end_date="2023-01-01")
+portfolio = Portfolio(Stock(["2330","1101"]))
+scraper = FinancialScraper(portfolio, "2022-01-01", "2023-12-31")
 ```
 
 3. 抓取財務報表： 使用 get_financial_statements() 方法來抓取財務數據。該方法允許選擇不同類型的報表，如資產負債表、損益表等。
