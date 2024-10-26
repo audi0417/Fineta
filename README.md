@@ -134,16 +134,3 @@ balance_sheet = scraper.get_financial_statements(statement_type="balance_sheet")
 export_to_csv(balance_sheet, "tsmc_balance_sheet.csv")
 ```
 
-## 例外處理
-在使用 Fineta 進行財務數據抓取的過程中，若遇到無法抓取或網站請求失敗等情況，會自動觸發自定義例外。這些例外都在 Fineta.crawler.exceptions 模組中定義，您可以自行捕捉並處理。
-```python
-from Fineta.crawler import FinancialScraper
-from Fineta.crawler.exceptions import ScraperError
-
-try:
-    scraper = FinancialScraper(stock_id="2330", start_date="2022-01-01", end_date="2023-01-01")
-    data = scraper.get_financial_statements(statement_type="balance_sheet")
-except ScraperError as e:
-    print(f"抓取失敗: {e}")
-```
-
