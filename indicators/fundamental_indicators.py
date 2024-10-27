@@ -14,9 +14,60 @@ class FundamentalIndicators:
     """
 
     def __init__(self, start_date: str, end_date: str):
-        self.start_date = start_date
-        self.end_date = end_date
-        self.context = ssl._create_unverified_context()  # 忽略 SSL 證書驗證
+        """
+        初始化 FundamentalIndicators。
+
+        Args:
+            start_date (str): 開始日期（格式：YYYY-MM-DD）
+            end_date (str): 結束日期（格式：YYYY-MM-DD）
+        """
+        self.start_date = self._convert_date_format(start_date)
+        self.end_date = self._convert_date_format(end_date)
+        self.context = ssl._create_unverified_context()
+
+    def _convert_date_format(self, date_str: str) -> str:
+        """
+        將 YYYY-MM-DD 格式轉換為 YYYYMMDD 格式
+
+        Args:
+            date_str (str): YYYY-MM-DD 格式的日期
+
+        Returns:
+            str: YYYYMMDD 格式的日期
+        """
+        return date_str.replace('-', '')
+
+
+    def _convert_to_float(self, value):
+        """
+        將字串轉換為浮點數，處理特殊字元。
+
+        Args:
+            value: 要轉換的值
+
+        Returns:
+            float 或 None: 轉換後的數值，如果無法轉換則返回 None
+        """
+        if isinstance(value, str):
+            # 移除千分位逗號和空白
+            value = value.replace(',', '').strip()
+            # 處理特殊字元
+            if value in ['-', '', 'N/A']:
+                return None
+        try:
+            return float(value)
+        except (ValueError, TypeError):
+            return None
+    
+    def _generate_month_range(self) -> List[str]:
+        """生成月份範圍內的日期列表（每月的第一天）"""
+        start = datetime.strptime(self.start_date, '%Y%m%d')
+        end = datetime.strptime(self.end_date, '%Y%m%d')
+        date_list = []
+        while start <= end:
+            date_list.append(start.strftime('%Y%m%d'))
+            start = (start.replace(day=28) + timedelta(days=4)).replace(day=1)
+        return date_list
 
     def _fetch_financial_metrics(self, date: str, stock_no: str, retries: int = 3, delay: int = 5) -> pd.DataFrame:
         url = f'https://www.twse.com.tw/exchangeReport/BWIBBU?response=json&date={date}&stockNo={stock_no}'
@@ -58,18 +109,18 @@ class FundamentalIndicators:
 
     def calculate_fundamentals(self, portfolio: Portfolio, max_workers: int = 5) -> Dict[str, pd.DataFrame]:
         """
-        計算股票的基本面指標，支持多日期範圍，並使用多線程加速抓取。
+        計算股票的基本面指標。
 
         Args:
-            portfolio (Portfolio): 包含多個股票對象的 Portfolio 對象。
-            max_workers (int): 最大線程數，默認為 5。
+            portfolio: Portfolio 對象
+            max_workers: 最大執行緒數
 
         Returns:
-            Dict[str, pd.DataFrame]: 每支股票代號對應一個 DataFrame，包含基本面指標和日期的 dict。
+            Dict[str, pd.DataFrame]: 股票代號對應的基本面指標 DataFrame
         """
         date_range = self._generate_month_range()
         stock_ids = portfolio.get_all_stock_ids()
-        results = {stock: [] for stock in stock_ids}  # 初始化每個股票的結果列表
+        results = {stock: [] for stock in stock_ids}
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             futures = []
@@ -79,21 +130,26 @@ class FundamentalIndicators:
 
             for future in as_completed(futures):
                 stock_data = future.result()
-                if stock_data is not None and not stock_data.empty:
+                if not stock_data.empty:
                     stock_no = stock_data['Stock'].values[0]
-                    results[stock_no].append({
-                        'Date': stock_data['Date'].values[0],
-                        'Dividend Yield': stock_data['殖利率(%)'].astype(float).values[0],
-                        'P/E': stock_data['本益比'].astype(float).values[0],
-                        'P/B': stock_data['股價淨值比'].astype(float).values[0],
-                    })
+                    try:
+                        results[stock_no].append({
+                            'Date': stock_data['Date'].values[0],
+                            'Dividend Yield': self._convert_to_float(stock_data['殖利率(%)'].values[0]),
+                            'P/E': self._convert_to_float(stock_data['本益比'].values[0]),
+                            'P/B': self._convert_to_float(stock_data['股價淨值比'].values[0]),
+                        })
+                    except (IndexError, KeyError) as e:
+                        print(f"Error processing data for stock {stock_no}: {e}")
+                        continue
 
-        # 將每支股票的結果整理為 DataFrame 並按日期排序
+        # 整理結果
         result_dfs = {}
         for stock, data in results.items():
-            df = pd.DataFrame(data)
-            df['Date'] = pd.to_datetime(df['Date'], format='%Y%m%d')
-            df = df.sort_values(by='Date').reset_index(drop=True)
-            result_dfs[stock] = df
+            if data:  # 只處理有資料的股票
+                df = pd.DataFrame(data)
+                df['Date'] = pd.to_datetime(df['Date'], format='%Y%m%d')
+                df = df.sort_values(by='Date').reset_index(drop=True)
+                result_dfs[stock] = df
 
         return result_dfs
