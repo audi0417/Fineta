@@ -1,4 +1,4 @@
-# FINPLUS/indicators/fundamental_indicators.py
+# Fineta/indicators/fundamental_indicators.py
 import pandas as pd
 import numpy as np
 import json
