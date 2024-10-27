@@ -112,11 +112,7 @@ scraper = FinancialScraper(portfolio, "2022-01-01", "2023-12-31")
 financial_data = scraper.get_financial_statements(statement_type="balance_sheet")
 print(financial_data)
 ```
-4. 導出結果： 抓取的數據可以通過 Fineta.export 模組以 CSV 或 Excel 格式導出。
-```python
-from Fineta.export import export_to_excel
-export_to_excel(financial_data, "financial_report.xlxs")
-```
+
 
 ## 範例
 以下是抓取 2330 台積電 2022 年 Q1 到 2023 年 Q1 期間的財務報表的完整範例：
