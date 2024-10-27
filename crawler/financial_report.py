@@ -1,5 +1,5 @@
-# FINPLUS/crawler/financial_scraper.py
-from FINPLUS.stock import Stock,Portfolio
+# Fineta/crawler/financial_scraper.py
+from Fineta.stock import Stock,Portfolio
 import requests
 import pandas as pd
 import time
