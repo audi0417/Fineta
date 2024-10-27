@@ -114,8 +114,8 @@ print(financial_data)
 ```
 4. 導出結果： 抓取的數據可以通過 Fineta.export 模組以 CSV 或 Excel 格式導出。
 ```python
-from Fineta.export import export_to_csv
-export_to_csv(financial_data, "financial_report.csv")
+from Fineta.export import export_to_excel
+export_to_excel(financial_data, "financial_report.xlxs")
 ```
 
 ## 範例
