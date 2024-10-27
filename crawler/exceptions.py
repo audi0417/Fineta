@@ -1,3 +1,5 @@
+# Fineta/crawler/exceptions.py
+
 class FinancialScraperError(Exception):
     """Base class for all exceptions raised by the FinancialScraper."""
     pass
@@ -50,6 +52,13 @@ class ConnectionTimeoutError(FinancialScraperError):
 class InvalidDateFormatError(FinancialScraperError):
     """Raised when the date format is invalid or cannot be parsed."""
     def __init__(self, message="Invalid date format. Please use 'YYYY-MM-DD'."):
+        self.message = message
+        super().__init__(self.message)
+
+
+class InvalidDateError(FinancialScraperError):
+    """Raised when the provided date is invalid or out of range."""
+    def __init__(self, message="Invalid date or date out of allowed range."):
         self.message = message
         super().__init__(self.message)
 
