@@ -93,7 +93,7 @@ Fineta 提供了從台灣證券交易所（TWSE）自動抓取公司財務資料
 
 ## 使用方法
 Fineta 可以用於抓取財務報表數據並進行分析
-導入核心模組： 首先，從 Fineta.crawler 中導入 FinancialReportScraper 類別。
+
 ```python
 from Fineta.stock import Stock,Portfolio
 from Fineta.crawler import FinancialReportScraper
