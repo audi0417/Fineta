@@ -114,19 +114,3 @@ print(financial_data)
 ```
 
 
-## 範例
-以下是抓取 2330 台積電 2022 年 Q1 到 2023 年 Q1 期間的財務報表的完整範例：
-```python
-from Fineta.crawler import FinancialScraper
-from Fineta.export import export_to_csv
-
-# 初始化財務數據抓取器
-scraper = FinancialScraper(stock_id="2330", start_date="2022-01-01", end_date="2023-01-01")
-
-# 抓取資產負債表數據
-balance_sheet = scraper.get_financial_statements(statement_type="balance_sheet")
-
-# 將數據匯出為 CSV 檔案
-export_to_csv(balance_sheet, "tsmc_balance_sheet.csv")
-```
-
