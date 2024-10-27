@@ -10,9 +10,7 @@ Fineta 是一個Python 程式庫，用於從台灣證券交易所（TWSE）網�
 - [檔案結構](#檔案結構)
 - [安裝](#安裝)
 - [使用方法](#使用方法)
-- [範例](#範例)
-- [例外處理](#例外處理)
-- [貢獻](#貢獻)
+
 
 ---
 
@@ -94,23 +92,19 @@ Fineta 提供了從台灣證券交易所（TWSE）自動抓取公司財務資料
    ```
 
 ## 使用方法
-Fineta 可以用於抓取財務報表數據並進行分析，具體步驟如下：
-
-1. 導入核心模組： 首先，從 Fineta.crawler 中導入 FinancialScraper 類別。
+Fineta 可以用於抓取財務報表數據並進行分析:
+導入核心模組： 首先，從 Fineta.crawler 中導入 FinancialScraper 類別。
 ```python
+from Fineta.stock import Stock,Portfolio
 from Fineta.crawler import FinancialScraper
-```
 
-2. 初始化 FinancialScraper 類別： 創建 FinancialScraper 的實例，可建立投資組合 (portfolio)，並指定當中的股票代號以及開始和結束日期 (start_date 和 end_date)。
-```python
 portfolio = Portfolio(Stock(["2330","1101"]))
-scraper = FinancialScraper(portfolio, "2022-01-01", "2023-12-31")
+scraper = FinancialScraper(portfolio, "2023-01-01", "2023-04-30")
+financial_statements = scraper.get_portfolio_financial_statements("資產負債表")
+
+# 現在 financial_statements 是一個字典，其中包含了每個股票的財務報表
+for stock_id, statement in financial_statements.items():
+    print(f"Financial statement for stock {stock_id}:")
+    print(statement)
+    print("\n")
 ```
-
-3. 抓取財務報表： 使用 get_financial_statements() 方法來抓取財務數據。該方法允許選擇不同類型的報表，如資產負債表、損益表等。
-```python
-financial_data = scraper.get_financial_statements(statement_type="balance_sheet")
-print(financial_data)
-```
-
-
