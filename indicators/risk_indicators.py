@@ -1,4 +1,4 @@
-# FINPLUS/indicators/risk_indicators.py
+# Fineta/indicators/risk_indicators.py
 
 import pandas as pd
 import numpy as np
