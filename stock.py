@@ -1,4 +1,4 @@
-# FINPLUS/stock.py
+# Fineta/stock.py
 
 from typing import Union, List
 
