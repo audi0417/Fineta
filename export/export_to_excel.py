@@ -5,8 +5,8 @@ from Fineta.crawler import StockPriceFetcher
 from Fineta.indicators.technical_indicators import (
     calculate_sma, calculate_ema, calculate_rsi, calculate_bollinger_bands, calculate_macd
 )
-from FINPLUS.indicators.fundamental_indicators import calculate_fundamentals
-from FINPLUS.indicators.risk_indicators import calculate_volatility_and_risk
+from Fineta.indicators.fundamental_indicators import calculate_fundamentals
+from Fineta.indicators.risk_indicators import calculate_volatility_and_risk
 
 class ExportToExcel:
     def __init__(self, fetcher: StockPriceFetcher):
