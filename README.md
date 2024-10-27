@@ -96,15 +96,27 @@ Fineta 可以用於抓取財務報表數據並進行分析:
 導入核心模組： 首先，從 Fineta.crawler 中導入 FinancialScraper 類別。
 ```python
 from Fineta.stock import Stock,Portfolio
-from Fineta.crawler import FinancialScraper
+from Fineta.crawler import FinancialReportScraper
 
-portfolio = Portfolio(Stock(["2330","1101"]))
-scraper = FinancialScraper(portfolio, "2023-01-01", "2023-04-30")
-financial_statements = scraper.get_portfolio_financial_statements("資產負債表")
+def main():
+    # 建立投資組合
+    portfolio = Portfolio(Stock(["2330"]))
+    
+    # 設定日期範圍
+    start_date = "2023-01-01"
+    end_date = "2023-12-31"
+    
+    # 初始化財務報表爬蟲
+    scraper = FinancialReportScraper(portfolio, start_date, end_date)
+    
+    # 獲取資產負債表
+    balance_sheets = scraper.get_portfolio_financial_statements("資產負債表")
+    
+    # 輸出結果
+    for stock_id, df in balance_sheets.items():
+        print(f"\n股票 {stock_id} 的資產負債表:")
+        print(df.head())
 
-# 現在 financial_statements 是一個字典，其中包含了每個股票的財務報表
-for stock_id, statement in financial_statements.items():
-    print(f"Financial statement for stock {stock_id}:")
-    print(statement)
-    print("\n")
+if __name__ == "__main__":
+    main()
 ```
