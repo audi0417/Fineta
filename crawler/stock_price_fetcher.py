@@ -7,9 +7,17 @@ from typing import Union, List
 
 class StockPriceFetcher:
     def __init__(self, target: Union[Stock, Portfolio], start_date: str, end_date: str):
+        """
+        初始化 StockPriceFetcher。
+
+        Args:
+            target: Stock 或 Portfolio 對象
+            start_date (str): 開始日期（格式：YYYY-MM-DD）
+            end_date (str): 結束日期（格式：YYYY-MM-DD）
+        """
         self.target = target
-        self.start_date = start_date
-        self.end_date = end_date
+        self.start_date = start_date  
+        self.end_date = end_date      
         self.stock_data = {}
 
     def fetch_stock_data(self):
