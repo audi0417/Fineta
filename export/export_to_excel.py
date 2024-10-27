@@ -1,8 +1,8 @@
-# FINPLUS/pricing/export_to_excel.py
+# Fineta/pricing/export_to_excel.py
 
 import pandas as pd
-from FINPLUS.crawler import StockPriceFetcher
-from FINPLUS.indicators.technical_indicators import (
+from Fineta.crawler import StockPriceFetcher
+from Fineta.indicators.technical_indicators import (
     calculate_sma, calculate_ema, calculate_rsi, calculate_bollinger_bands, calculate_macd
 )
 from FINPLUS.indicators.fundamental_indicators import calculate_fundamentals
