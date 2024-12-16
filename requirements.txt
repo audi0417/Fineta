@@ -6,3 +6,5 @@ lxml
 yfinance
 tqdm
 openpyxl
+rich
+loguru
