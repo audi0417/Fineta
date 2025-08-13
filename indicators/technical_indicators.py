@@ -1,4 +1,5 @@
 import pandas as pd
+from typing import Union, List
 
 class TechnicalIndicators:
     """
@@ -22,57 +23,69 @@ class TechnicalIndicators:
         """計算指數移動平均線 (EMA)"""
         return self.df.groupby(level='Stock')['Close'].transform(lambda x: x.ewm(span=span, adjust=False).mean())
 
-    def calculate_rsi(self, windows: list = [6, 12, 24]) -> pd.DataFrame:
+    def calculate_rsi(self, window: Union[int, List[int]] = [6, 12, 24]) -> pd.DataFrame:
         """
         計算相對強弱指數 (RSI)。
         
         Args:
-            windows (list): 回顧期間列表，預設[6, 12, 24]天
+            window (Union[int, List[int]]): 回顧期間，可為單一數值或列表，預設[6, 12, 24]天
             
         Returns:
             pd.DataFrame: 包含不同週期的RSI值的DataFrame
         """
+        # 統一處理單值和列表輸入
+        if isinstance(window, int):
+            windows_list = [window]
+        else:
+            windows_list = window
+            
         rsi_dict = {}
         
-        for window in windows:
+        for w in windows_list:
             delta = self.df['Close'].groupby(level='Stock').transform(lambda x: x.diff())
             gain = (delta.where(delta > 0, 0)).groupby(level='Stock').transform(
-                lambda x: x.rolling(window=window).mean()
+                lambda x: x.rolling(window=w).mean()
             )
             loss = (-delta.where(delta < 0, 0)).groupby(level='Stock').transform(
-                lambda x: x.rolling(window=window).mean()
+                lambda x: x.rolling(window=w).mean()
             )
             rs = gain / loss
             rsi = 100 - (100 / (1 + rs))
-            rsi_dict[f'RSI_{window}'] = rsi
+            rsi_dict[f'RSI_{w}'] = rsi
         
         return pd.DataFrame(rsi_dict)
 
-    def calculate_bollinger_bands(self, windows: list = [5, 20, 60]) -> pd.DataFrame:
+    def calculate_bollinger_bands(self, window: Union[int, List[int]] = [5, 20, 60]) -> Union[pd.DataFrame, pd.DataFrame]:
         """
         計算布林帶 (Bollinger Bands)。
         
         Args:
-            windows (list): 回顧期間列表，預設[5, 20, 60]天
+            window (Union[int, List[int]]): 回顧期間，可為單一數值或列表，預設[5, 20, 60]天
             
         Returns:
             pd.DataFrame: 包含不同週期的布林帶值的DataFrame
         """
+        # 統一處理單值和列表輸入
+        if isinstance(window, int):
+            windows_list = [window]
+        else:
+            windows_list = window
+            
         bb_dict = {}
         
-        for window in windows:
+        for w in windows_list:
             middle_band = self.df['Close'].groupby(level='Stock').transform(
-                lambda x: x.rolling(window=window).mean()
+                lambda x: x.rolling(window=w).mean()
             )
             std_dev = self.df['Close'].groupby(level='Stock').transform(
-                lambda x: x.rolling(window=window).std()
+                lambda x: x.rolling(window=w).std()
             )
             upper_band = middle_band + (2 * std_dev)
             lower_band = middle_band - (2 * std_dev)
             
-            bb_dict[f'Middle_Band_{window}'] = middle_band
-            bb_dict[f'Upper_Band_{window}'] = upper_band
-            bb_dict[f'Lower_Band_{window}'] = lower_band
+            bb_dict[f'Middle_Band_{w}'] = middle_band
+            bb_dict[f'Upper_Band_{w}'] = upper_band
+            bb_dict[f'Lower_Band_{w}'] = lower_band
         
         return pd.DataFrame(bb_dict)
 
@@ -107,27 +120,33 @@ class TechnicalIndicators:
                     macd_dict[f'{key_prefix}_Hist'] = macd - signal
         
         return pd.DataFrame(macd_dict)
-    def calculate_stochastic(self, windows: list = [9, 14], smooth_k: int = 3, smooth_d: int = 3) -> pd.DataFrame:
+    def calculate_stochastic(self, window: Union[int, List[int]] = [9, 14], smooth_k: int = 3, smooth_d: int = 3) -> pd.DataFrame:
         """
         計算KD指標 (Stochastic Oscillator)。
         
         Args:
-            windows (list): 回顧期間列表，預設[9, 14]天
+            window (Union[int, List[int]]): 回顧期間，可為單一數值或列表，預設[9, 14]天
             smooth_k (int): %K的平滑期間，預設3天
             smooth_d (int): %D的平滑期間，預設3天
             
         Returns:
             pd.DataFrame: 包含不同週期的%K和%D值的DataFrame
         """
+        # 統一處理單值和列表輸入
+        if isinstance(window, int):
+            windows_list = [window]
+        else:
+            windows_list = window
+            
         kd_dict = {}
         
-        for window in windows:
+        for w in windows_list:
             # 計算基本值
             low_min = self.df['Low'].groupby(level='Stock').transform(
-                lambda x: x.rolling(window=window).min()
+                lambda x: x.rolling(window=w).min()
             )
             high_max = self.df['High'].groupby(level='Stock').transform(
-                lambda x: x.rolling(window=window).max()
+                lambda x: x.rolling(window=w).max()
             )
             
             # 計算%K (Fast Stochastic)
@@ -144,12 +163,12 @@ class TechnicalIndicators:
             )
             
             # 儲存結果
-            kd_dict[f'K_{window}'] = k
-            kd_dict[f'D_{window}'] = d
+            kd_dict[f'K_{w}'] = k
+            kd_dict[f'D_{w}'] = d
         
         return pd.DataFrame(kd_dict)
 
-    def calculate_williams_r(self, windows: list = [5, 10, 14]) -> pd.DataFrame:
+    def calculate_williams_r(self, window: Union[int, List[int]] = [5, 10, 14]) -> pd.DataFrame:
         """
         計算威廉指標 (Williams %R)。
         
@@ -160,29 +179,35 @@ class TechnicalIndicators:
         RSV = (收盤價 - N日最低價) ÷ (N日最高價 - N日最低價) × 100%
         
         Args:
-            windows (list): 回顧期間列表，預設[5, 10, 14]天
+            window (Union[int, List[int]]): 回顧期間，可為單一數值或列表，預設[5, 10, 14]天
             
         Returns:
             pd.DataFrame: 包含不同週期的Williams %R值，範圍為0到-100
                         數值越接近0代表超買
                         數值越接近-100代表超賣
         """
+        # 統一處理單值和列表輸入
+        if isinstance(window, int):
+            windows_list = [window]
+        else:
+            windows_list = window
+            
         williams_dict = {}
         
-        for window in windows:
+        for w in windows_list:
             # 計算N日週期內的最高價和最低價
             highest_high = self.df['High'].groupby(level='Stock').transform(
-                lambda x: x.rolling(window=window).max()
+                lambda x: x.rolling(window=w).max()
             )
             lowest_low = self.df['Low'].groupby(level='Stock').transform(
-                lambda x: x.rolling(window=window).min()
+                lambda x: x.rolling(window=w).min()
             )
             
             # 計算威廉指標
             williams_r = ((highest_high - self.df['Close']) / 
                         (highest_high - lowest_low) * 100 * (-1))
             
-            williams_dict[f'WR_{window}'] = williams_r
+            williams_dict[f'WR_{w}'] = williams_r
         
         return pd.DataFrame(williams_dict)
 
@@ -233,7 +258,7 @@ class TechnicalIndicators:
             'ADX': adx
         })
 
-    def calculate_cci(self, windows: list = [14], constant: float = 0.015) -> pd.DataFrame:
+    def calculate_cci(self, window: Union[int, List[int]] = [14], constant: float = 0.015) -> pd.DataFrame:
         """
         計算商品通道指標 (CCI - Commodity Channel Index)。
         
@@ -245,30 +270,36 @@ class TechnicalIndicators:
         - MD = 近N日（MA－收盤價）的累計之和 ÷ N
         
         Args:
-            windows (list): 回顧期間的列表，預設[14]天
+            window (Union[int, List[int]]): 回顧期間，可為單一數值或列表，預設[14]天
             constant (float): 計算係數，預設0.015
             
         Returns:
             pd.DataFrame: 不同時間週期的CCI值，約75%會落在-100到+100之間
         """    
+        # 統一處理單值和列表輸入
+        if isinstance(window, int):
+            windows_list = [window]
+        else:
+            windows_list = window
+            
         # 計算典型價格 (TP)
         tp = (self.df['High'] + self.df['Low'] + self.df['Close']) / 3
         
         cci_dict = {}
         
-        for window in windows:
+        for w in windows_list:
             # 計算MA (收盤價的N日簡單移動平均)
             ma = self.df['Close'].groupby(level='Stock').transform(
-                lambda x: x.rolling(window=window).mean()
+                lambda x: x.rolling(window=w).mean()
             )
             
             # 計算MD (MA與收盤價差的N日平均)
             md = (abs(ma - self.df['Close'])).groupby(level='Stock').transform(
-                lambda x: x.rolling(window=window).mean()
+                lambda x: x.rolling(window=w).mean()
             )
             
             # 計算CCI
             cci = (tp - ma) / (constant * md)
-            cci_dict[f'CCI_{window}'] = cci
+            cci_dict[f'CCI_{w}'] = cci
         
         return pd.DataFrame(cci_dict)
