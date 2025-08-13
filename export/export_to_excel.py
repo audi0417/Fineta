@@ -45,7 +45,7 @@ class ExportToExcel:
         df['SMA_200'] = self.technical_indicators.calculate_sma(window=200)
         df['EMA_12'] = self.technical_indicators.calculate_ema(span=12)
         df['EMA_26'] = self.technical_indicators.calculate_ema(span=26)
-        df['RSI_14'] = self.technical_indicators.calculate_rsi(window=14)
+        df['RSI_14'] = self.technical_indicators.calculate_rsi(windows=[14])
 
         # 計算布林帶
         bollinger_bands = self.technical_indicators.calculate_bollinger_bands(window=20)
