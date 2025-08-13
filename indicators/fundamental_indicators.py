@@ -2,11 +2,15 @@ import pandas as pd
 import json
 import time
 import ssl
+import urllib3
 from urllib.request import urlopen
 from datetime import datetime, timedelta
 from typing import List, Dict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from Fineta.stock import Portfolio
+
+# 抑制 SSL 警告
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class FundamentalIndicators:
     """
@@ -59,16 +63,6 @@ class FundamentalIndicators:
         except (ValueError, TypeError):
             return None
     
-    def _generate_month_range(self) -> List[str]:
-        """生成月份範圍內的日期列表（每月的第一天）"""
-        start = datetime.strptime(self.start_date, '%Y%m%d')
-        end = datetime.strptime(self.end_date, '%Y%m%d')
-        date_list = []
-        while start <= end:
-            date_list.append(start.strftime('%Y%m%d'))
-            start = (start.replace(day=28) + timedelta(days=4)).replace(day=1)
-        return date_list
-
     def _fetch_financial_metrics(self, date: str, stock_no: str, retries: int = 3, delay: int = 5) -> pd.DataFrame:
         url = f'https://www.twse.com.tw/exchangeReport/BWIBBU?response=json&date={date}&stockNo={stock_no}'
         attempts = 0
