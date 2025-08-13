@@ -8,6 +8,10 @@ from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from .exceptions import InvalidDateError, DataFetchError
 from Fineta.stock import Portfolio
+import urllib3
+
+# 抑制 SSL 警告
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class ESGReportScraper:
     """
@@ -59,7 +63,7 @@ class ESGReportScraper:
         }
 
         try:
-            response = requests.post(self.base_url, json=payload, timeout=30)
+            response = requests.post(self.base_url, json=payload, timeout=30, verify=False)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
