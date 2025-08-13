@@ -9,6 +9,10 @@ from typing import Dict, List, Tuple, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from .exceptions import InvalidTypeError
 from Fineta.stock import Stock, Portfolio
+import urllib3
+
+# 抑制 SSL 警告
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class FinancialReportScraper:
     """財務報表爬蟲類別，用於從台灣證券交易所獲取企業財務報表"""
@@ -116,14 +120,31 @@ class FinancialReportScraper:
         Returns:
             Optional[str]: 包含財務數據的HTML字符串，若請求失敗則返回None
         """
-        url = (
-            f'https://mops.twse.com.tw/server-java/t164sb01?'
-            f'step=1&CO_ID={stock_id}&SYEAR={year}&'
-            f'SSEASON={season}&REPORT_ID=C#'
-        )
+        url = 'https://mopsov.twse.com.tw/server-java/t164sb01'
+        
+        # 設定 headers 來模擬瀏覽器請求
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'zh-TW,zh;q=0.9,en;q=0.8',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Content-Type': 'application/x-www-form-urlencoded',
+        }
+        
+        # 設定 POST 參數
+        data = {
+            'step': '1',
+            'CO_ID': stock_id,
+            'SYEAR': str(year),
+            'SSEASON': str(season),
+            'REPORT_ID': 'C'
+        }
         
         try:
-            response = requests.post(url, timeout=30)
+            # 關閉 SSL 憑證驗證來避免憑證問題
+            response = requests.post(url, headers=headers, data=data, timeout=30, verify=False)
             response.raise_for_status()
             response.encoding = 'big5'
             return response.text
