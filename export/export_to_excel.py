@@ -3,6 +3,7 @@ from Fineta.crawler.stock_price_fetcher import StockPriceFetcher
 from Fineta.indicators.technical_indicators import TechnicalIndicators
 from Fineta.indicators.fundamental_indicators import FundamentalIndicators
 from Fineta.indicators.risk_indicators import RiskIndicators
+from Fineta.indicators.barra_factors import BarraFactors
 from Fineta.stock import Portfolio
 
 class ExportToExcel:
@@ -71,6 +72,32 @@ class ExportToExcel:
         risk_calculator = RiskIndicators(self.df)
         return risk_calculator.calculate_volatility_and_risk(metrics)
 
+    def calculate_barra_factors(self, market_index: str = '^TWII'):
+        """
+        計算 Barra 多因子暴露度。
+
+        Args:
+            market_index: 市場指數代碼，預設台灣加權指數
+
+        Returns:
+            pd.DataFrame: 各股票的因子暴露度
+        """
+        barra = BarraFactors(self.df)
+        return barra.calculate_factor_exposures(market_index=market_index)
+
+    def calculate_barra_risk_decomposition(self, market_index: str = '^TWII'):
+        """
+        計算 Barra 風險分解。
+
+        Args:
+            market_index: 市場指數代碼
+
+        Returns:
+            pd.DataFrame: 各股票的因子風險 vs 特定風險
+        """
+        barra = BarraFactors(self.df)
+        return barra.decompose_risk(market_index=market_index)
+
     def export(self, file_path: str):
         """
         將所有分析結果匯出至 Excel 檔案。
@@ -94,3 +121,15 @@ class ExportToExcel:
             # 風險指標
             risk_df = self.calculate_risk_indicators()
             risk_df.to_excel(writer, sheet_name='Volatility & Risk')
+
+            # Barra 因子暴露度
+            try:
+                barra_exposures = self.calculate_barra_factors()
+                if not barra_exposures.empty:
+                    barra_exposures.to_excel(writer, sheet_name='Barra Factor Exposures')
+
+                barra_risk = self.calculate_barra_risk_decomposition()
+                if not barra_risk.empty:
+                    barra_risk.to_excel(writer, sheet_name='Barra Risk Decomposition')
+            except Exception as e:
+                print(f"Barra 因子計算時發生錯誤（已跳過）: {e}")
