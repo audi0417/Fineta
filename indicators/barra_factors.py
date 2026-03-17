@@ -67,15 +67,14 @@ class BarraFactors:
         q_high = series.quantile(upper)
         return series.clip(lower=q_low, upper=q_high)
 
-    def _compute_size_factor(self) -> pd.DataFrame:
+    def _compute_size_factor(self) -> pd.Series:
         """計算 Size 因子：以 log(Close × Volume) 作為市值代理。"""
         df = self.df.copy()
         df['_market_cap_proxy'] = np.log(df['Close'] * df['Volume'] + 1)
-        result = df.groupby(level='Date')['_market_cap_proxy'].apply(
+        # 使用 transform 保留原始 MultiIndex 結構，避免 groupby.apply 產生額外索引層
+        result = df.groupby(level='Date')['_market_cap_proxy'].transform(
             lambda x: self._zscore(self._winsorize(x))
         )
-        if isinstance(result, pd.DataFrame):
-            result = result.stack()
         return result.rename('Size')
 
     def _compute_beta_factor(self, market_index: str,
@@ -276,21 +275,25 @@ class BarraFactors:
         merged = exposures.join(daily_returns, how='inner').dropna()
 
         factor_cols = [c for c in exposures.columns if c in merged.columns]
+        n_factors = len(factor_cols)
         factor_returns_list = []
 
         for date in merged.index.get_level_values('Date').unique():
-            day_data = merged.xs(date, level='Date')
-            if len(day_data) < len(factor_cols) + 1:
+            day_data = merged.xs(date, level='Date').dropna()
+            if len(day_data) < 2:
                 continue
 
             X = day_data[factor_cols].values
             y = day_data['Return'].values
+            n_obs = len(day_data)
 
-            # OLS: f = (X'X)^(-1) X'y
+            # Ridge 正規化回歸：f = (X'X + λI)^{-1} X'y
+            # 當 n_obs >= n_factors 時 λ 很小（近似 OLS）；欠定時加大正規化強度
+            lambda_ridge = 1e-4 if n_obs >= n_factors else 1e-2
             try:
                 XtX = X.T @ X
                 Xty = X.T @ y
-                f_hat = np.linalg.solve(XtX, Xty)
+                f_hat = np.linalg.solve(XtX + lambda_ridge * np.eye(n_factors), Xty)
                 factor_returns_list.append(
                     dict(zip(['Date'] + factor_cols, [date] + f_hat.tolist()))
                 )
